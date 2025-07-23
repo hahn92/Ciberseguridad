@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias de Ciberseguridad Diarias</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Noticias de Ciberseguridad</h1>
+        <p>Actualizadas diariamente</p>
+    </header>
+
+    <main>
+        <div class="navigation">
+            <button id="prev-day-btn">&lt; Día Anterior</button>
+            <h2 id="current-date-display"></h2>
+            <button id="next-day-btn">Día Siguiente &gt;</button>
+        </div>
+        <div id="news-container">
+            <!-- Las noticias se cargarán aquí con JavaScript -->
+            <div class="loader">Cargando noticias...</div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
