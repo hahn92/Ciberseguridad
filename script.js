@@ -26,11 +26,56 @@ document.addEventListener('DOMContentLoaded', () => {
         articles.forEach(article => {
             const articleElement = document.createElement('div');
             articleElement.className = 'news-article';
-            articleElement.innerHTML = `
-                <h3><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></h3>
-                <p>${article.description || 'No hay descripción disponible.'}</p>
-                <p class="source">Fuente: ${article.source} - ${new Date(article.publishedAt).toLocaleString()}</p>
-            `;
+
+            // Título y enlace
+            let html = '';
+            if (article.title && article.url) {
+                html += `<h3><a href="${article.url}" target="_blank" rel="noopener noreferrer">${article.title}</a></h3>`;
+            } else if (article.title) {
+                html += `<h3>${article.title}</h3>`;
+            }
+
+            // Autor
+            if (article.author) {
+                html += `<p><strong>Autor:</strong> ${article.author}</p>`;
+            }
+
+            // Imagen
+            if (article.urlToImage) {
+                html += `<img src="${article.urlToImage}" alt="Imagen de la noticia" style="max-width:300px; margin-bottom:10px;">`;
+            }
+
+            // Descripción
+            if (article.description) {
+                html += `<p>${article.description}</p>`;
+            }
+
+            // Contenido extendido
+            if (article.content) {
+                html += `<p>${article.content}</p>`;
+            }
+
+            // Fuente (puede ser string o objeto)
+            let fuente = '';
+            if (article.source) {
+                if (typeof article.source === 'object' && article.source.name) {
+                    fuente = article.source.name;
+                } else {
+                    fuente = article.source;
+                }
+            }
+
+            // Fecha
+            let fecha = '';
+            if (article.publishedAt) {
+                fecha = new Date(article.publishedAt).toLocaleString();
+            }
+
+            if (fuente || fecha) {
+                html += `<p class="source">${fuente ? 'Fuente: ' + fuente : ''}${fuente && fecha ? ' - ' : ''}${fecha}</p>`;
+            }
+
+            articleElement.innerHTML = html;
             newsContainer.appendChild(articleElement);
         });
     }
