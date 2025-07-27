@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.alt = 'Imagen de la noticia';
                 img.style.maxWidth = '300px';
                 img.style.marginBottom = '10px';
+                img.loading = 'lazy'; // Lazy loading para optimización
+                img.setAttribute('role', 'presentation');
                 img.onload = function() {
                     articleElement.insertBefore(img, articleElement.firstChild.nextSibling);
                 };
@@ -170,3 +172,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 })();
+
+// --- Notificaciones Push ---
+if ('Notification' in window && 'serviceWorker' in navigator) {
+    const pushBtn = document.createElement('button');
+    pushBtn.textContent = '🔔 Suscríbete a notificaciones';
+    pushBtn.setAttribute('aria-label', 'Suscribirse a notificaciones push');
+    pushBtn.style.position = 'absolute';
+    pushBtn.style.bottom = '85%';
+    pushBtn.style.right = '15%';
+    pushBtn.style.transform = 'translate(50%, 50%)';
+    pushBtn.style.zIndex = '1000';
+    pushBtn.style.background = 'var(--color-btn-bg)';
+    pushBtn.style.color = 'var(--color-btn-text)';
+    pushBtn.style.border = 'none';
+    pushBtn.style.padding = '0.8rem 1.3rem';
+    pushBtn.style.borderRadius = '8px';
+    pushBtn.style.fontSize = '1.1rem';
+    pushBtn.style.fontWeight = '700';
+    pushBtn.style.boxShadow = '0 2px 8px rgba(78,84,200,0.10)';
+    pushBtn.style.cursor = 'pointer';
+    pushBtn.style.transition = 'background 0.3s, color 0.3s, box-shadow 0.2s';
+    document.body.appendChild(pushBtn);
+
+    function hidePushBtn() {
+        pushBtn.style.opacity = '0';
+        pushBtn.style.pointerEvents = 'none';
+        setTimeout(() => { if (pushBtn.parentNode) pushBtn.parentNode.removeChild(pushBtn); }, 700);
+    }
+
+    function askPermissionAndSubscribe() {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                pushBtn.textContent = '✅ Suscrito a notificaciones';
+                pushBtn.disabled = true;
+                // Aquí podrías registrar un Service Worker real y suscribirte a un servidor push
+                // Ejemplo: navigator.serviceWorker.register('sw.js')
+                // ...
+                new Notification('¡Gracias por suscribirte!', {
+                    body: 'Recibirás alertas de nuevas noticias importantes.',
+                    icon: '/Images/favicon.ico'
+                });
+            } else {
+                pushBtn.textContent = '❌ Permiso denegado';
+                setTimeout(() => { pushBtn.textContent = '🔔 Suscríbete a notificaciones'; }, 3000);
+            }
+        });
+        setTimeout(hidePushBtn, 10000);
+    }
+
+    pushBtn.addEventListener('click', askPermissionAndSubscribe);
+    setTimeout(hidePushBtn, 5000);
+}
