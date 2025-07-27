@@ -3,27 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noticias de Ciberseguridad Diarias</title>
+    <title>Seguridad y Tecnología: Noticias y Alertas</title>
+    <meta name="description" content="Noticias, alertas y novedades sobre ciberseguridad, tecnología, vulnerabilidades, ataques y protección digital. Actualizaciones diarias para mantenerte informado.">
+    <meta name="keywords" content="ciberseguridad, seguridad informática, tecnología, noticias, alertas, vulnerabilidades, ataques, protección, hacking, privacidad, malware, ransomware, seguridad digital">
+    <meta name="author" content="Seguridad y Tecnología">
+    <link rel="canonical" href="https://hahn92.github.io/Ciberseguridad/">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Seguridad y Tecnología: Noticias y Alertas">
+    <meta property="og:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología. Mantente informado sobre los últimos ataques, vulnerabilidades y consejos de protección digital.">
+    <meta property="og:url" content="https://hahn92.github.io/Ciberseguridad/">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Seguridad y Tecnología: Noticias y Alertas">
+    <meta name="twitter:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología. Mantente informado sobre los últimos ataques, vulnerabilidades y consejos de protección digital.">
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>Noticias de Ciberseguridad</h1>
-        <p>Actualizadas diariamente</p>
+        <h1>Seguridad y Tecnología: Noticias y Alertas</h1>
+        <nav aria-label="Navegación principal">
+            <ul style="display:none">
+                <li><a href="/">Inicio</a></li>
+            </ul>
+        </nav>
     </header>
 
     <main>
-        <div class="navigation">
+        <section class="navigation" aria-label="Navegación por fechas">
             <button id="prev-day-btn">&lt; Día Anterior</button>
             <h2 id="current-date-display"></h2>
             <button id="next-day-btn">Día Siguiente &gt;</button>
-        </div>
-        <div id="news-container">
+        </section>
+        <section id="news-container" aria-live="polite">
             <!-- Las noticias se cargarán aquí con JavaScript -->
             <div class="loader">Cargando noticias...</div>
-        </div>
+        </section>
     </main>
 
+    <footer>
+        <p>&copy; 2025 Seguridad y Tecnología. Todos los derechos reservados.</p>
+    </footer>
     <script src="script.js"></script>
 </body>
 </html>
