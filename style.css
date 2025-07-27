@@ -244,3 +244,34 @@ footer {
 .news-article, .navigation button, #news-container {
     transition: background 0.4s, color 0.4s, box-shadow 0.3s, transform 0.2s, opacity 0.7s;
 }
+
+.search-filter {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#search-input, #source-filter {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-secondary);
+    font-size: 1rem;
+    background: var(--color-bg-card);
+    color: var(--color-text);
+    box-shadow: 0 1px 4px var(--color-shadow);
+    transition: background 0.3s, color 0.3s, border 0.3s;
+}
+#search-input:focus, #source-filter:focus {
+    outline: 2px solid var(--color-primary);
+    border-color: var(--color-primary);
+}
+.dark #search-input, .dark #source-filter {
+    background: #232526;
+    color: #f5f6fa;
+    border: 1.5px solid var(--color-primary);
+}

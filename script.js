@@ -20,11 +20,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para mostrar las noticias en el DOM
     function displayNews(articles) {
         newsContainer.innerHTML = ''; // Limpiar contenedor
+        allArticles = articles;
+        updateSourceFilter(articles);
+        filterAndRender();
+    }
+
+    // Función para cargar las noticias de una fecha específica
+    async function fetchNews(date) {
+        const dateString = formatDate(date);
+        const url = `data/${dateString}.json`;
+
+        // Animación de salida
+        newsContainer.classList.remove('fade-in');
+        newsContainer.classList.add('fade-out');
+
+        setTimeout(async () => {
+            newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
+            dateDisplay.textContent = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            // Deshabilitar el botón "siguiente" si estamos viendo el día de hoy
+            nextDayBtn.disabled = (date.toDateString() === today.toDateString());
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    // Si el archivo no existe (404), es un error esperado
+                    throw new Error('No hay noticias para esta fecha.');
+                }
+                const articles = await response.json();
+                displayNews(articles);
+                updateSourceFilter(articles); // Actualizar fuentes disponibles
+                allArticles = articles; // Guardar todas las noticias para búsqueda/filtro
+            } catch (error) {
+                console.error('Error fetching news:', error);
+                newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
+            }
+            // Animación de entrada
+            newsContainer.classList.remove('fade-out');
+            newsContainer.classList.add('fade-in');
+        }, 700);
+    }
+
+    // --- Buscador y filtro de noticias ---
+    let allArticles = [];
+    const searchInput = document.getElementById('search-input');
+    const sourceFilter = document.getElementById('source-filter');
+
+    function renderNews(articles) {
+        newsContainer.innerHTML = '';
         if (!articles || articles.length === 0) {
-            newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
+            newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta búsqueda.</p>`;
             return;
         }
-
         articles.forEach(article => {
             const articleElement = document.createElement('div');
             articleElement.className = 'news-article';
@@ -92,36 +137,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Función para cargar las noticias de una fecha específica
-    async function fetchNews(date) {
-        const dateString = formatDate(date);
-        const url = `data/${dateString}.json`;
-
-        // Animación de salida
-        newsContainer.classList.remove('fade-in');
-        newsContainer.classList.add('fade-out');
-
-        setTimeout(async () => {
-            newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
-            dateDisplay.textContent = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-            // Deshabilitar el botón "siguiente" si estamos viendo el día de hoy
-            nextDayBtn.disabled = (date.toDateString() === today.toDateString());
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    // Si el archivo no existe (404), es un error esperado
-                    throw new Error('No hay noticias para esta fecha.');
+    function filterAndRender() {
+        const search = searchInput.value.trim().toLowerCase();
+        const source = sourceFilter.value;
+        let filtered = allArticles.filter(article => {
+            let fuente = '';
+            if (article.source) {
+                if (typeof article.source === 'object' && article.source.name) {
+                    fuente = article.source.name;
+                } else {
+                    fuente = article.source;
                 }
-                const articles = await response.json();
-                displayNews(articles);
-            } catch (error) {
-                console.error('Error fetching news:', error);
-                newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
             }
-            // Animación de entrada
-            newsContainer.classList.remove('fade-out');
-            newsContainer.classList.add('fade-in');
-        }, 700);
+            const matchText = [article.title, article.description, article.content, fuente].join(' ').toLowerCase();
+            const matchSource = !source || fuente === source;
+            return matchText.includes(search) && matchSource;
+        });
+        renderNews(filtered);
+    }
+
+    searchInput.addEventListener('input', filterAndRender);
+    sourceFilter.addEventListener('change', filterAndRender);
+
+    function updateSourceFilter(articles) {
+        const fuentes = new Set();
+        articles.forEach(article => {
+            let fuente = '';
+            if (article.source) {
+                if (typeof article.source === 'object' && article.source.name) {
+                    fuente = article.source.name;
+                } else {
+                    fuente = article.source;
+                }
+            }
+            if (fuente) fuentes.add(fuente);
+        });
+        sourceFilter.innerHTML = '<option value="">Todas las fuentes</option>' +
+            Array.from(fuentes).sort().map(f => `<option value="${f}">${f}</option>`).join('');
     }
 
     // Event Listeners para la navegación

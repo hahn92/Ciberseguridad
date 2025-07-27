@@ -38,6 +38,12 @@
     </header>
 
     <main>
+        <section class="search-filter" aria-label="Buscador y filtro de noticias" style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;">
+            <input id="search-input" type="search" placeholder="Buscar por palabra clave o fuente..." aria-label="Buscar noticias" style="flex:1;min-width:180px;padding:0.6rem 1rem;border-radius:8px;border:1.5px solid var(--color-secondary);font-size:1rem;">
+            <select id="source-filter" aria-label="Filtrar por fuente" style="padding:0.6rem 1rem;border-radius:8px;border:1.5px solid var(--color-secondary);font-size:1rem;">
+                <option value="">Todas las fuentes</option>
+            </select>
+        </section>
         <section class="navigation" aria-label="Navegación por fechas">
             <button id="prev-day-btn">&lt; Día Anterior</button>
             <h2 id="current-date-display"></h2>
