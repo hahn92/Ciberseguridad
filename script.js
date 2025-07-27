@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const newsContainer = document.getElementById('news-container');
+    // Inicializar animación de entrada al cargar
+    newsContainer.classList.add('fade-in');
     const prevDayBtn = document.getElementById('prev-day-btn');
     const nextDayBtn = document.getElementById('next-day-btn');
     const dateDisplay = document.getElementById('current-date-display');
@@ -93,24 +95,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateString = formatDate(date);
         const url = `data/${dateString}.json`;
 
-        newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
-        dateDisplay.textContent = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-        
-        // Deshabilitar el botón "siguiente" si estamos viendo el día de hoy
-        nextDayBtn.disabled = (date.toDateString() === today.toDateString());
+        // Animación de salida
+        newsContainer.classList.remove('fade-in');
+        newsContainer.classList.add('fade-out');
 
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                // Si el archivo no existe (404), es un error esperado
-                throw new Error('No hay noticias para esta fecha.');
+        setTimeout(async () => {
+            newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
+            dateDisplay.textContent = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            // Deshabilitar el botón "siguiente" si estamos viendo el día de hoy
+            nextDayBtn.disabled = (date.toDateString() === today.toDateString());
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    // Si el archivo no existe (404), es un error esperado
+                    throw new Error('No hay noticias para esta fecha.');
+                }
+                const articles = await response.json();
+                displayNews(articles);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+                newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
             }
-            const articles = await response.json();
-            displayNews(articles);
-        } catch (error) {
-            console.error('Error fetching news:', error);
-            newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
-        }
+            // Animación de entrada
+            newsContainer.classList.remove('fade-out');
+            newsContainer.classList.add('fade-in');
+        }, 700);
     }
 
     // Event Listeners para la navegación
