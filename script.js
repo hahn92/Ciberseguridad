@@ -136,3 +136,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carga inicial de noticias
     fetchNews(currentDate);
 });
+
+// --- Modo oscuro/automático ---
+(function() {
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('toggle-theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let theme = localStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+
+    function setTheme(newTheme) {
+        if (newTheme === 'dark') {
+            root.classList.add('dark');
+            themeIcon.textContent = '☀️';
+        } else {
+            root.classList.remove('dark');
+            themeIcon.textContent = '🌙';
+        }
+        localStorage.setItem('theme', newTheme);
+    }
+
+    setTheme(theme);
+
+    themeBtn.addEventListener('click', () => {
+        theme = (root.classList.contains('dark')) ? 'light' : 'dark';
+        setTheme(theme);
+    });
+
+    // Detectar cambio de preferencia del sistema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+})();

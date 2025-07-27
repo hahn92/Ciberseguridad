@@ -1,10 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap');
 
+:root {
+    --color-bg: #f5f6fa;
+    --color-bg-card: #fff;
+    --color-bg-header: linear-gradient(90deg, #232526 0%, #414345 100%);
+    --color-bg-footer: linear-gradient(90deg, #232526 0%, #414345 100%);
+    --color-text: #232526;
+    --color-primary: #4e54c8;
+    --color-secondary: #8f94fb;
+    --color-btn-text: #fff;
+    --color-btn-bg: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+    --color-btn-bg-hover: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+    --color-shadow: rgba(44,62,80,0.10);
+    --color-card-shadow: rgba(67,198,172,0.05);
+    --color-loader: #4e54c8;
+}
+
+.dark {
+    --color-bg: #181a1b;
+    --color-bg-card: #232526;
+    --color-bg-header: linear-gradient(90deg, #181a1b 0%, #232526 100%);
+    --color-bg-footer: linear-gradient(90deg, #181a1b 0%, #232526 100%);
+    --color-text: #f5f6fa;
+    --color-primary: #8f94fb;
+    --color-secondary: #4e54c8;
+    --color-btn-text: #23739b;
+    --color-btn-bg: linear-gradient(90deg, #232526 0%, #414345 100%);
+    --color-btn-bg-hover: linear-gradient(90deg, #414345 0%, #232526 100%);
+    --color-shadow: rgba(44,62,80,0.30);
+    --color-card-shadow: rgba(67,198,172,0.10);
+    --color-loader: #8f94fb;
+}
+
 body {
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
-    background: linear-gradient(135deg, #232526 0%, #3a3a3a 100%);
-    color: #232526;
+    background: var(--color-bg);
+    color: var(--color-text);
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -13,7 +45,7 @@ body {
 }
 
 header {
-    background: linear-gradient(90deg, #232526 0%, #414345 100%);
+    background: var(--color-bg-header);
     color: #fff;
     text-align: center;
     padding: 2.5rem 0 1.5rem 0;
@@ -40,7 +72,7 @@ main {
 }
 
 footer {
-    background: linear-gradient(90deg, #232526 0%, #414345 100%);
+    background: var(--color-bg-footer);
     color: #fff;
     text-align: center;
     padding: 1.2rem 0 1.2rem 0;
@@ -64,11 +96,14 @@ footer {
     backdrop-filter: blur(2px);
     gap: 1.5rem;
 }
+.dark .navigation {
+    background: rgba(35,37,38,0.92);
+}
 
 .navigation button {
-    background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-    color: #fff;
-    border: none;
+    background: var(--color-btn-bg);
+    color: var(--color-btn-text);
+    border: 1.5px solid var(--color-secondary);
     padding: 0.6rem 1.1rem;
     border-radius: 8px;
     cursor: pointer;
@@ -78,20 +113,28 @@ footer {
     transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
     outline: none;
 }
-
+.dark .navigation button {
+    background: var(--color-btn-bg);
+    color: var(--color-btn-text);
+    border: 1.5px solid var(--color-primary);
+    box-shadow: 0 2px 8px rgba(143,148,251,0.18);
+}
 .navigation button:hover {
-    background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+    background: var(--color-btn-bg-hover);
     transform: translateY(-2px) scale(1.04);
     box-shadow: 0 4px 16px rgba(78,84,200,0.15);
 }
 
 .navigation button:disabled {
     background-color: #bdc3c7;
+    color: #888;
+    border: 1.5px solid #888;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
 #current-date-display {
-    color: #232526;
+    color: var(--color-text);
     font-weight: 600;
     font-size: 1.05rem;
     letter-spacing: 1px;
@@ -100,10 +143,10 @@ footer {
 }
 
 #news-container {
-    background: rgba(255,255,255,0.97);
+    background: var(--color-bg-card);
     padding: 1.5rem 1.2rem;
     border-radius: 18px;
-    box-shadow: 0 6px 32px rgba(44,62,80,0.10);
+    box-shadow: 0 6px 32px var(--color-shadow);
     min-height: 300px;
     margin-bottom: 1.5rem;
     backdrop-filter: blur(2px);
@@ -115,7 +158,7 @@ footer {
     margin-bottom: 0.5rem;
     background: linear-gradient(90deg, #f5f7fa 0%, #c3cfe2 100%);
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(67,198,172,0.05);
+    box-shadow: 0 2px 12px var(--color-card-shadow);
     transition: box-shadow 0.2s, transform 0.2s;
 }
 .news-article:hover {
@@ -127,7 +170,7 @@ footer {
     margin-top: 0;
     font-size: 1.35rem;
     font-weight: 800;
-    color: #232526;
+    color: var(--color-text);
     letter-spacing: 0.5px;
 }
 
@@ -140,19 +183,19 @@ footer {
 }
 
 .news-article a:hover {
-    color: #232526;
+    color: var(--color-text);
     text-shadow: 0 2px 8px #8f94fb44;
 }
 
 .news-article p {
     margin: 0.5rem 0;
     font-size: 1.08rem;
-    color: #232526;
+    color: var(--color-text);
 }
 
 .news-article .source {
     font-size: 0.98rem;
-    color: #232526;
+    color: var(--color-text);
     opacity: 0.7;
     margin-top: 0.7rem;
 }
@@ -161,7 +204,7 @@ footer {
     text-align: center;
     font-size: 1.25rem;
     padding: 2.5rem 0;
-    color: #4e54c8;
+    color: var(--color-loader);
     letter-spacing: 1px;
     font-weight: 700;
 }
@@ -174,4 +217,9 @@ footer {
 .fade-in {
     opacity: 1;
     transition: opacity 0.7s ease;
+}
+
+/* Animaciones sutiles */
+.news-article, .navigation button, #news-container {
+    transition: background 0.4s, color 0.4s, box-shadow 0.3s, transform 0.2s, opacity 0.7s;
 }
