@@ -3,8 +3,8 @@
 :root {
     --color-bg: #f5f6fa;
     --color-bg-card: #fff;
-    --color-bg-header: linear-gradient(90deg, #232526 0%, #414345 100%);
-    --color-bg-footer: linear-gradient(90deg, #232526 0%, #414345 100%);
+    --color-bg-header: linear-gradient(90deg, #162b4e 0%, #162b4e 100%);
+    --color-bg-footer: linear-gradient(90deg, #162b4e 0%, #162b4e 100%);
     --color-text: #232526;
     --color-primary: #4e54c8;
     --color-secondary: #8f94fb;
@@ -19,8 +19,8 @@
 .dark {
     --color-bg: #181a1b;
     --color-bg-card: #232526;
-    --color-bg-header: linear-gradient(90deg, #181a1b 0%, #232526 100%);
-    --color-bg-footer: linear-gradient(90deg, #181a1b 0%, #232526 100%);
+    --color-bg-header: linear-gradient(90deg, #162b4e 0%, #162b4e 100%);
+    --color-bg-footer: linear-gradient(90deg, #162b4e 0%, #162b4e 100%);
     --color-text: #f5f6fa;
     --color-primary: #8f94fb;
     --color-secondary: #4e54c8;
@@ -64,7 +64,7 @@ header h1 {
     font-size: 2.2rem;
     font-weight: 800;
     margin: 0;
-    background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+    background: linear-gradient(90deg, #fff 0%, #babfff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
