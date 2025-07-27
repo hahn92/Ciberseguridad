@@ -40,9 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `<p><strong>Autor:</strong> ${article.author}</p>`;
             }
 
-            // Imagen
+            // Imagen (solo si carga correctamente)
             if (article.urlToImage) {
-                html += `<img src="${article.urlToImage}" alt="Imagen de la noticia" style="max-width:300px; margin-bottom:10px;">`;
+                const img = new window.Image();
+                img.src = article.urlToImage;
+                img.alt = 'Imagen de la noticia';
+                img.style.maxWidth = '300px';
+                img.style.marginBottom = '10px';
+                img.onload = function() {
+                    articleElement.insertBefore(img, articleElement.firstChild.nextSibling);
+                };
+                // No se agrega si falla (onerror)
             }
 
             // Descripción
