@@ -200,7 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- NUEVO: Actualizar la URL al cambiar de fecha (usa /YYYYMMDD) ---
     function updateUrlWithDate(date) {
         const dateString = formatDate(date);
-        window.history.replaceState({}, '', `/${dateString}`);
+        // Detectar si la web está en una subcarpeta (por ejemplo, /Ciberseguridad/)
+        const basePath = window.location.pathname.split('/').slice(0,2).join('/') + '/';
+        window.history.replaceState({}, '', `${basePath}${dateString}`);
     }
 
     // Event Listeners para la navegación
