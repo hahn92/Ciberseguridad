@@ -6,7 +6,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextDayBtn = document.getElementById('next-day-btn');
     const dateDisplay = document.getElementById('current-date-display');
 
-    let currentDate = new Date();
+    // --- NUEVO: Obtener fecha desde la URL (soporta ?fecha=YYYYMMDD y /YYYYMMDD) ---
+    function getDateFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        let fechaParam = params.get('fecha');
+        if (!fechaParam) {
+            // Buscar en la ruta tipo /20250723
+            const match = window.location.pathname.match(/\/(\d{8})$/);
+            if (match) {
+                fechaParam = match[1];
+            }
+        }
+        if (fechaParam && /^\d{8}$/.test(fechaParam)) {
+            // Formato esperado: YYYYMMDD
+            const year = parseInt(fechaParam.slice(0, 4), 10);
+            const month = parseInt(fechaParam.slice(4, 6), 10) - 1;
+            const day = parseInt(fechaParam.slice(6, 8), 10);
+            return new Date(year, month, day);
+        }
+        return new Date();
+    }
+
+    let currentDate = getDateFromUrl();
     const today = new Date();
 
     // Función para formatear la fecha a YYYYMMDD
@@ -176,18 +197,27 @@ document.addEventListener('DOMContentLoaded', () => {
             Array.from(fuentes).sort().map(f => `<option value="${f}">${f}</option>`).join('');
     }
 
+    // --- NUEVO: Actualizar la URL al cambiar de fecha (usa /YYYYMMDD) ---
+    function updateUrlWithDate(date) {
+        const dateString = formatDate(date);
+        window.history.replaceState({}, '', `/${dateString}`);
+    }
+
     // Event Listeners para la navegación
     prevDayBtn.addEventListener('click', () => {
         currentDate.setDate(currentDate.getDate() - 1);
+        updateUrlWithDate(currentDate);
         fetchNews(currentDate);
     });
 
     nextDayBtn.addEventListener('click', () => {
         currentDate.setDate(currentDate.getDate() + 1);
+        updateUrlWithDate(currentDate);
         fetchNews(currentDate);
     });
 
     // Carga inicial de noticias
+    updateUrlWithDate(currentDate);
     fetchNews(currentDate);
 });
 
