@@ -200,8 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- NUEVO: Actualizar la URL al cambiar de fecha (usa /YYYYMMDD) ---
     function updateUrlWithDate(date) {
         const dateString = formatDate(date);
-        // Detectar si la web está en una subcarpeta (por ejemplo, /Ciberseguridad/)
-        const basePath = window.location.pathname.split('/').slice(0,2).join('/') + '/';
+        // Obtener la ruta base actual (subcarpeta) y mantenerla relativa
+        const pathParts = window.location.pathname.split('/');
+        // Si la ruta termina en / o /YYYYMMDD, quitamos la última parte si es fecha
+        if (/^\d{8}$/.test(pathParts[pathParts.length - 1])) {
+            pathParts.pop();
+        }
+        // Si la última parte está vacía (por ejemplo, termina en /), no la quitamos
+        const basePath = pathParts.join('/').replace(/\/$/, '') + '/';
         window.history.replaceState({}, '', `${basePath}${dateString}`);
     }
 
