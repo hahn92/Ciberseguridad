@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.alt = 'Imagen de la noticia';
                 img.style.maxWidth = '300px';
                 img.style.marginBottom = '10px';
-                img.loading = 'lazy'; // Lazy loading para optimización
+                // img.loading = 'lazy'; // Lazy loading para optimización
                 img.setAttribute('role', 'presentation');
                 img.onload = function() {
                     articleElement.insertBefore(img, articleElement.firstChild.nextSibling);
