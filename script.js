@@ -48,31 +48,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para cargar las noticias de una fecha específica
     async function fetchNews(date) {
-        const dateString = formatDate(date);
-        const url = `data/${dateString}.json`;
-
         // Animación de salida
         newsContainer.classList.remove('fade-in');
         newsContainer.classList.add('fade-out');
 
         setTimeout(async () => {
-            newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
-            dateDisplay.textContent = date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-            // Deshabilitar el botón "siguiente" si estamos viendo el día de hoy
-            nextDayBtn.disabled = (date.toDateString() === today.toDateString());
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    // Si el archivo no existe (404), es un error esperado
-                    throw new Error('No hay noticias para esta fecha.');
+            let found = false;
+            let searchDate = new Date(date);
+            let articles = null;
+            let tries = 0;
+            const maxTries = 30; // Evita bucle infinito, busca hasta 30 días atrás
+            while (!found && tries < maxTries) {
+                const dateString = formatDate(searchDate);
+                const url = `data/${dateString}.json`;
+                newsContainer.innerHTML = '<div class="loader">Cargando noticias...</div>';
+                dateDisplay.textContent = searchDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                nextDayBtn.disabled = (searchDate.toDateString() === today.toDateString());
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        articles = await response.json();
+                        found = true;
+                        break;
+                    }
+                } catch (error) {
+                    // Ignorar error, seguir buscando
                 }
-                const articles = await response.json();
+                // Retroceder un día
+                searchDate.setDate(searchDate.getDate() - 1);
+                tries++;
+            }
+            if (found && articles && articles.length > 0) {
                 displayNews(articles);
-                updateSourceFilter(articles); // Actualizar fuentes disponibles
-                allArticles = articles; // Guardar todas las noticias para búsqueda/filtro
-            } catch (error) {
-                console.error('Error fetching news:', error);
-                newsContainer.innerHTML = `<p class="error-message">No se encontraron noticias para esta fecha.</p>`;
+                updateSourceFilter(articles);
+                allArticles = articles;
+                if (tries > 0) {
+                    newsContainer.insertAdjacentHTML('afterbegin', `<p class=\"error-message\">No se encontraron noticias para la fecha seleccionada. Mostrando la más reciente disponible.</p>`);
+                }
+                dateDisplay.textContent = searchDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                updateUrlWithDate(searchDate);
+                currentDate = searchDate;
+            } else {
+                newsContainer.innerHTML = `<p class=\"error-message\">No se encontraron noticias en los últimos ${maxTries} días.</p>`;
             }
             // Animación de entrada
             newsContainer.classList.remove('fade-out');
