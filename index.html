@@ -3,61 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguridad y Tecnología: Noticias y Alertas</title>
-    <meta name="description" content="Noticias, alertas y novedades sobre ciberseguridad, tecnología, vulnerabilidades, ataques y protección digital. Actualizaciones diarias para mantenerte informado.">
-    <meta name="keywords" content="ciberseguridad, seguridad informática, tecnología, noticias, alertas, vulnerabilidades, ataques, protección, hacking, privacidad, malware, ransomware, seguridad digital">
-    <meta name="author" content="Seguridad y Tecnología">
+    <title>SecureByte News · Ciberseguridad y Tecnología</title>
+    <meta name="description" content="Noticias, alertas y novedades sobre ciberseguridad, tecnología, vulnerabilidades, ataques y protección digital. Actualizaciones diarias.">
+    <meta name="keywords" content="ciberseguridad, seguridad informática, tecnología, noticias, alertas, vulnerabilidades, hacking, privacidad, malware, ransomware">
+    <meta name="author" content="SecureByte News">
     <link rel="canonical" href="https://thesecurebytenews.hahndev.com">
     <meta name="robots" content="index, follow">
-    <!-- Adds -->
     <meta name="google-adsense-account" content="ca-pub-5060273779558812">
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Seguridad y Tecnología: Noticias y Alertas">
+    <meta property="og:title" content="SecureByte News · Ciberseguridad y Tecnología">
     <meta property="og:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología. Mantente informado sobre los últimos ataques, vulnerabilidades y consejos de protección digital.">
     <meta property="og:url" content="https://thesecurebytenews.hahndev.com">
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Seguridad y Tecnología: Noticias y Alertas">
-    <meta name="twitter:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología. Mantente informado sobre los últimos ataques, vulnerabilidades y consejos de protección digital.">
+    <meta name="twitter:title" content="SecureByte News · Ciberseguridad y Tecnología">
+    <meta name="twitter:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología.">
     <!-- Favicon -->
     <link rel="icon" href="/Images/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>SEGURIDAD Y TECNOLOGÍA: NOTICIAS Y ALERTAS</h1>
-        <nav aria-label="Navegación principal">
-            <ul style="display:none">
-                <li><a href="/">Inicio</a></li>
-            </ul>
-        </nav>
-        <button id="toggle-theme-btn" aria-label="Alternar modo claro/oscuro" title="Modo claro/oscuro" style="position:absolute;top:1.5rem;right:2rem;z-index:10;background:none;border:none;cursor:pointer;font-size:1.5rem;color:inherit;">
-            <span id="theme-icon">🌙</span>
-        </button>
+
+    <!-- ═══ HEADER (siempre oscuro + sticky) ═══ -->
+    <header id="site-header">
+        <div class="header-inner">
+
+            <!-- Fila 1: Marca + Toggle tema -->
+            <div class="brand-row">
+                <div class="brand">
+                    <div class="brand-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <polyline points="9 12 11 14 15 10"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">SecureByte News</span>
+                        <span class="brand-tagline">Ciberseguridad · Tecnología · Alertas</span>
+                    </div>
+                </div>
+                <button id="toggle-theme-btn" aria-label="Alternar modo claro/oscuro" title="Modo claro/oscuro">
+                    <span id="theme-icon"></span>
+                </button>
+            </div>
+
+            <!-- Fila 2: Búsqueda + Filtro + Navegación fechas -->
+            <div class="toolbar-row">
+                <div class="search-filter">
+                    <div class="search-wrapper">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input id="search-input" type="search" placeholder="Buscar noticias..." aria-label="Buscar noticias" autocomplete="off">
+                    </div>
+                    <select id="source-filter" aria-label="Filtrar por fuente">
+                        <option value="">Todas las fuentes</option>
+                    </select>
+                </div>
+
+                <nav class="date-nav" aria-label="Navegación por fechas">
+                    <button id="prev-day-btn" aria-label="Día anterior">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <h2 id="current-date-display"></h2>
+                    <button id="next-day-btn" aria-label="Día siguiente">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </nav>
+            </div>
+
+        </div>
     </header>
 
+    <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
     <main>
-        <section class="search-filter" aria-label="Buscador y filtro de noticias" style="margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;">
-            <input id="search-input" type="search" placeholder="Buscar por palabra clave o fuente..." aria-label="Buscar noticias" style="flex:1;min-width:180px;padding:0.6rem 1rem;border-radius:8px;border:1.5px solid var(--color-secondary);font-size:1rem;">
-            <select id="source-filter" aria-label="Filtrar por fuente" style="padding:0.6rem 1rem;border-radius:8px;border:1.5px solid var(--color-secondary);font-size:1rem;">
-                <option value="">Todas las fuentes</option>
-            </select>
-        </section>
-        <section class="navigation" aria-label="Navegación por fechas">
-            <button id="prev-day-btn">&lt; Día Anterior</button>
-            <h2 id="current-date-display"></h2>
-            <button id="next-day-btn">Día Siguiente &gt;</button>
-        </section>
-        <section id="news-container" aria-live="polite">
-            <!-- Las noticias se cargarán aquí con JavaScript -->
-            <div class="loader">Cargando noticias...</div>
-        </section>
+        <div class="stats-bar" id="stats-bar" aria-live="polite" aria-atomic="true"></div>
+        <section id="news-container" aria-live="polite" aria-label="Listado de noticias"></section>
     </main>
 
+    <!-- Botón volver arriba -->
+    <button id="back-to-top" aria-label="Volver al inicio de la página" title="Volver arriba">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
+
+    <!-- ═══ FOOTER ═══ -->
     <footer>
-        <p>&copy; 2025 Seguridad y Tecnología. Todos los derechos reservados.</p>
+        <div class="footer-inner">
+            <span class="footer-brand">SecureByte News</span>
+            <span class="footer-copy">&copy; 2025 Seguridad y Tecnología. Todos los derechos reservados.</span>
+            <span class="footer-hint">Usa ← → para navegar entre días</span>
+        </div>
     </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
