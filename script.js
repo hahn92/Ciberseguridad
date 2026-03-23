@@ -191,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.appendChild(wrap);
 
                 const img = new Image();
-                img.loading = 'lazy';
                 img.alt = '';
                 img.onload  = () => wrap.appendChild(img);
                 img.onerror = () => wrap.remove();
