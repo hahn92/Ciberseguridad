@@ -1,356 +1,503 @@
-// ══════════════════════════════════════════
-//  TEMA (se inicializa antes del DOM para
-//  evitar flash of wrong theme)
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  SecureByte News · v2 — client logic
+// ══════════════════════════════════════════════════════════════
+
+/* ---- THEME (init early to prevent FOUC) ---- */
 (function () {
-    const root    = document.documentElement;
-    const btn     = document.getElementById('toggle-theme-btn');
-    const iconEl  = document.getElementById('theme-icon');
-    const prefer  = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    let theme     = localStorage.getItem('theme') || (prefer ? 'dark' : 'light');
+  const root  = document.documentElement;
+  const stored = localStorage.getItem('sbn-theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const initial = stored || (prefersLight ? 'light' : 'dark');
+  if (initial === 'light') root.classList.add('light');
 
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn  = document.getElementById('toggle-theme-btn');
+    const icon = document.getElementById('theme-icon');
     const icons = {
-        dark:  `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
-        light: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+      sun:  `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`,
+      moon: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
     };
-
-    function setTheme(t) {
-        theme = t;
-        root.classList.toggle('dark', t === 'dark');
-        iconEl.innerHTML = t === 'dark' ? icons.light : icons.dark;
-        localStorage.setItem('theme', t);
-    }
-
-    setTheme(theme);
-
-    btn.addEventListener('click', () => setTheme(root.classList.contains('dark') ? 'light' : 'dark'));
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
+    function paint() { icon.innerHTML = root.classList.contains('light') ? icons.moon : icons.sun; }
+    paint();
+    btn.addEventListener('click', () => {
+      root.classList.toggle('light');
+      localStorage.setItem('sbn-theme', root.classList.contains('light') ? 'light' : 'dark');
+      paint();
     });
+  });
+}());
+
+/* ---- UTC clock ticker ---- */
+(function () {
+  function tick() {
+    const d = new Date();
+    const hh = String(d.getUTCHours()).padStart(2,'0');
+    const mm = String(d.getUTCMinutes()).padStart(2,'0');
+    const ss = String(d.getUTCSeconds()).padStart(2,'0');
+    const el = document.getElementById('t-clock');
+    if (el) el.textContent = `${hh}:${mm}:${ss}`;
+  }
+  tick();
+  setInterval(tick, 1000);
 }());
 
 
-// ══════════════════════════════════════════
-//  APP PRINCIPAL
-// ══════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
+   APP
+   ══════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // — Elementos —
-    const newsContainer = document.getElementById('news-container');
-    const prevBtn       = document.getElementById('prev-day-btn');
-    const nextBtn       = document.getElementById('next-day-btn');
-    const dateDisplay   = document.getElementById('current-date-display');
-    const statsBar      = document.getElementById('stats-bar');
-    const backToTop     = document.getElementById('back-to-top');
-    const searchInput   = document.getElementById('search-input');
-    const sourceFilter  = document.getElementById('source-filter');
+  const newsContainer = document.getElementById('news-container');
+  const prevBtn       = document.getElementById('prev-day-btn');
+  const nextBtn       = document.getElementById('next-day-btn');
+  const dateDisplay   = document.getElementById('current-date-display');
+  const feedCount     = document.getElementById('feed-count');
+  const feedFilterInfo= document.getElementById('feed-filter-info');
+  const searchInput   = document.getElementById('search-input');
+  const sourceFilter  = document.getElementById('source-filter');
+  const sortSelect    = document.getElementById('sort-select');
+  const sourceListEl  = document.getElementById('source-list');
+  const backToTop     = document.getElementById('back-to-top');
 
-    let allArticles = [];
-    let currentDate = getDateFromUrl();
-    const today = new Date();
+  const mTotal   = document.getElementById('m-total');
+  const mSources = document.getElementById('m-sources');
+  const mAuthors = document.getElementById('m-authors');
+  const mImgs    = document.getElementById('m-imgs');
+  const mIssue   = document.getElementById('m-issue');
+  const mDate    = document.getElementById('m-date');
+  const tFeed    = document.getElementById('t-feed');
+  const tSrc     = document.getElementById('t-src');
+  const tEdition = document.getElementById('t-edition');
+  const tLatest  = document.getElementById('t-latest');
+  const sourcesCount = document.getElementById('sources-count');
+  const metricId  = document.getElementById('metric-id');
+  const hourlyBars = document.getElementById('hourly-bars');
+  const hourlyTotal = document.getElementById('hourly-total');
+  const peakTag    = document.getElementById('peak-tag');
+  const vtList = document.getElementById('vt-list');
+  const vtGrid = document.getElementById('vt-grid');
 
-    // ── Utilidades de fecha ──────────────────
+  let allArticles = [];
+  let currentDate = getDateFromUrl();
+  let currentView = localStorage.getItem('sbn-view') || 'list';
+  const today = new Date();
 
-    function getDateFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        let p = params.get('fecha');
-        if (!p) {
-            const m = window.location.pathname.match(/\/(\d{8})(?:\/)?$/);
-            if (m) p = m[1];
-        }
-        if (p && /^\d{8}$/.test(p)) {
-            return new Date(
-                parseInt(p.slice(0, 4), 10),
-                parseInt(p.slice(4, 6), 10) - 1,
-                parseInt(p.slice(6, 8), 10)
-            );
-        }
-        return new Date();
+  // Compute a stable base URL for fetching data, regardless of any /YYYYMMDD
+  // suffix present in the current location. This prevents 404s when the URL
+  // has been rewritten via history.replaceState to look like a "directory".
+  const dataBase = (() => {
+    const path = window.location.pathname
+      .replace(/\/\d{8}\/?$/, '/')
+      .replace(/\/[^/]*\.html?\/?$/, '/');
+    const dir  = path.endsWith('/') ? path : path.replace(/[^/]*$/, '');
+    return new URL(dir, window.location.origin).href;
+  })();
+  function dataUrl(ds) { return new URL(`data/${ds}.json`, dataBase).href; }
+
+  /* ─── date utils ─── */
+  function getDateFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    let p = params.get('fecha');
+    if (!p) {
+      const m = window.location.pathname.match(/\/(\d{8})(?:\/)?$/);
+      if (m) p = m[1];
+    }
+    if (p && /^\d{8}$/.test(p)) {
+      return new Date(+p.slice(0,4), +p.slice(4,6)-1, +p.slice(6,8));
+    }
+    return new Date();
+  }
+  function fmtDate(d) {
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function isTodayOrLater(d) {
+    const a = new Date(d); a.setHours(0,0,0,0);
+    const b = new Date(today); b.setHours(0,0,0,0);
+    return a >= b;
+  }
+  function dispDate(d) {
+    return d.toLocaleDateString('es-ES', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+  }
+  function dispShort(d) {
+    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+  }
+  function updateUrl(d) {
+    const ds = fmtDate(d);
+    const parts = window.location.pathname.split('/');
+    if (/^\d{8}$/.test(parts[parts.length-1])) parts.pop();
+    const base = parts.join('/').replace(/\/$/, '') + '/';
+    window.history.replaceState({}, '', `${base}${ds}`);
+  }
+
+  /* ─── article utils ─── */
+  function getSource(a) {
+    if (!a.source) return '';
+    return (typeof a.source === 'object' ? a.source.name : a.source) || '';
+  }
+  function cleanContent(t) {
+    if (!t) return '';
+    return t.replace(/\s*\[?\+?\d[\d\s]*chars?\]?\s*$/i, '').trim();
+  }
+  function relTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso); if (isNaN(d)) return '';
+    const diff = Date.now() - d;
+    const h = Math.floor(diff / 3_600_000);
+    const days = Math.floor(diff / 86_400_000);
+    if (h < 1)  return '<1h';
+    if (h < 24) return `${h}h`;
+    if (days < 7) return `${days}d`;
+    return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+  }
+  function exactTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso); if (isNaN(d)) return '';
+    return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`;
+  }
+
+  // Hash-based muted color for source badge — no fake severity
+  function srcAccent(s) {
+    let h = 0; for (let i = 0; i < s.length; i++) h = (h*31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h) % 360;
+  }
+
+  /* ─── skeleton ─── */
+  function showSkeleton(n = 6) {
+    const tpl = `
+      <div class="skel-card">
+        <div class="skel skel-id"></div>
+        <div>
+          <div class="skel skel-meta"></div>
+          <div class="skel skel-title"></div>
+          <div class="skel skel-desc"></div>
+          <div class="skel skel-desc-2"></div>
+        </div>
+        <div class="skel skel-thumb"></div>
+      </div>`;
+    newsContainer.innerHTML = Array.from({length:n}, () => tpl).join('');
+  }
+
+  /* ─── view mode ─── */
+  function applyView() {
+    newsContainer.classList.toggle('grid', currentView === 'grid');
+    vtList.classList.toggle('active', currentView === 'list');
+    vtGrid.classList.toggle('active', currentView === 'grid');
+  }
+  vtList.addEventListener('click', () => { currentView='list'; localStorage.setItem('sbn-view','list'); applyView(); });
+  vtGrid.addEventListener('click', () => { currentView='grid'; localStorage.setItem('sbn-view','grid'); applyView(); });
+
+  /* ─── render ─── */
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderNews(articles, dateForId) {
+    newsContainer.innerHTML = '';
+    if (!articles || articles.length === 0) {
+      newsContainer.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <strong>NO_RESULTS</strong>
+          <small>// ajusta los filtros o la búsqueda</small>
+        </div>`;
+      return;
     }
 
-    function formatDate(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}${m}${d}`;
-    }
+    const idDate = dateForId ? fmtDate(dateForId) : 'XXXXXXXX';
+    const frag = document.createDocumentFragment();
 
-    function isTodayOrLater(date) {
-        const a = new Date(date); a.setHours(0, 0, 0, 0);
-        const b = new Date(today); b.setHours(0, 0, 0, 0);
-        return a >= b;
-    }
+    articles.forEach((a, idx) => {
+      const card = document.createElement('article');
+      card.className = 'card';
 
-    function displayDate(date) {
-        return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
+      const src   = getSource(a);
+      const url   = a.url || '';
+      const title = a.title || 'Sin título';
+      const desc  = a.description || cleanContent(a.content) || '';
+      const author= a.author || '';
+      const id    = `NEWS-${idDate}-${String(idx+1).padStart(3,'0')}`;
 
-    function updateUrlWithDate(date) {
-        const ds = formatDate(date);
-        const parts = window.location.pathname.split('/');
-        if (/^\d{8}$/.test(parts[parts.length - 1])) parts.pop();
-        const base = parts.join('/').replace(/\/$/, '') + '/';
-        window.history.replaceState({}, '', `${base}${ds}`);
-    }
+      const titleHtml = url
+        ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`
+        : escapeHtml(title);
 
-    // ── Utilidades de artículo ───────────────
+      const idCell = `<div class="card-id-wrap"><div class="card-id">${id}</div></div>`;
+      const idPlain = `<div class="card-id">${id}</div>`;
 
-    function getSource(article) {
-        if (!article.source) return '';
-        return (typeof article.source === 'object' ? article.source.name : article.source) || '';
-    }
+      const bodyHtml = `
+        ${currentView==='grid' ? idCell : idPlain}
+        <div class="card-body">
+          <div class="card-meta">
+            ${src ? `<span class="src-dot" style="--h:${srcAccent(src)}"></span><span class="card-source">${escapeHtml(src)}</span>` : ''}
+            <span class="card-time">${relTime(a.publishedAt)}${a.publishedAt ? ' · '+exactTime(a.publishedAt):''}</span>
+          </div>
+          <h3 class="card-title">${titleHtml}</h3>
+          ${desc ? `<p class="card-desc">${escapeHtml(desc)}</p>` : ''}
+          <div class="card-foot">
+            ${author ? `<span class="author">${escapeHtml(author)}</span>` : ''}
+            ${url ? `<a class="read" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">READ <span class="arrow">→</span></a>` : ''}
+          </div>
+        </div>`;
 
-    /** Elimina el artefacto de truncación "[+N chars]" del contenido */
-    function cleanContent(text) {
-        if (!text) return '';
-        return text.replace(/\s*\[?\+?\d[\d\s]*chars?\]?\s*$/i, '').trim();
-    }
+      card.innerHTML = bodyHtml;
 
-    function relativeTime(isoString) {
-        if (!isoString) return '';
-        const d = new Date(isoString);
-        if (isNaN(d)) return '';
-        const diff = Date.now() - d;
-        const h = Math.floor(diff / 3_600_000);
-        const days = Math.floor(diff / 86_400_000);
-        if (h < 1)   return 'hace menos de 1h';
-        if (h < 24)  return `hace ${h}h`;
-        if (days < 7) return `hace ${days}d`;
-        return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-    }
+      // image (with terminal-style corner stamp)
+      if (a.urlToImage) {
+        const wrap = document.createElement('div');
+        wrap.className = 'card-thumb';
+        const corner = document.createElement('span');
+        corner.className = 'card-thumb-corner';
+        corner.textContent = 'IMG';
+        wrap.appendChild(corner);
 
-    // ── Skeleton ─────────────────────────────
+        const img = new Image();
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onload  = () => wrap.appendChild(img);
+        img.onerror = () => wrap.remove();
+        img.src = a.urlToImage;
 
-    function showSkeleton(n = 6) {
-        const tpl = `
-            <div class="skeleton-card">
-                <div class="skeleton-body">
-                    <div class="skeleton-line skeleton-base s"></div>
-                    <div class="skeleton-line skeleton-base l"></div>
-                    <div class="skeleton-line skeleton-base xl"></div>
-                    <div class="skeleton-line skeleton-base m"></div>
-                </div>
-                <div class="skeleton-thumb skeleton-base"></div>
-            </div>`;
-        newsContainer.innerHTML = Array.from({ length: n }, () => tpl).join('');
-    }
-
-    // ── Render de noticias ───────────────────
-
-    function renderNews(articles) {
-        newsContainer.innerHTML = '';
-
-        if (!articles || articles.length === 0) {
-            newsContainer.innerHTML = `
-                <div class="state-msg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                    </svg>
-                    <strong>Sin resultados</strong>
-                    <small>Prueba con otra búsqueda o cambia la fuente</small>
-                </div>`;
-            return;
-        }
-
-        const frag = document.createDocumentFragment();
-
-        articles.forEach(article => {
-            const card   = document.createElement('article');
-            card.className = 'news-card';
-
-            const source  = getSource(article);
-            const relTime = relativeTime(article.publishedAt);
-            const desc    = article.description || cleanContent(article.content) || '';
-            const title   = article.title || 'Sin título';
-            const url     = article.url || '';
-            const author  = article.author || '';
-
-            card.innerHTML = `
-                <div class="card-body">
-                    <div class="card-meta-top">
-                        ${source   ? `<span class="source-badge">${source}</span>` : ''}
-                        ${relTime  ? `<time class="card-time">${relTime}</time>` : ''}
-                    </div>
-                    <h3 class="card-title">
-                        ${url
-                            ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>`
-                            : title}
-                    </h3>
-                    ${desc ? `<p class="card-desc">${desc}</p>` : ''}
-                    <div class="card-footer">
-                        <span class="card-author">${author}</span>
-                        ${url ? `<a class="card-link" href="${url}" target="_blank" rel="noopener noreferrer">Leer artículo →</a>` : ''}
-                    </div>
-                </div>`;
-
-            // Imagen: reserva espacio inmediatamente; quita si falla
-            if (article.urlToImage) {
-                const wrap = document.createElement('div');
-                wrap.className = 'card-image-wrap';
-                card.appendChild(wrap);
-
-                const img = new Image();
-                img.alt = '';
-                img.onload  = () => wrap.appendChild(img);
-                img.onerror = () => wrap.remove();
-                img.src = article.urlToImage;
-            }
-
-            frag.appendChild(card);
-        });
-
-        newsContainer.appendChild(frag);
-    }
-
-    // ── Filtrado ─────────────────────────────
-
-    function filterAndRender() {
-        const search = searchInput.value.trim().toLowerCase();
-        const source = sourceFilter.value;
-
-        const filtered = allArticles.filter(a => {
-            const src  = getSource(a);
-            const text = [a.title, a.description, a.content, src].join(' ').toLowerCase();
-            return text.includes(search) && (!source || src === source);
-        });
-
-        renderNews(filtered);
-
-        if (filtered.length !== allArticles.length) {
-            statsBar.textContent = `${filtered.length} de ${allArticles.length} noticias`;
+        if (currentView === 'grid') {
+          card.insertBefore(wrap, card.firstChild);
         } else {
-            statsBar.textContent = `${allArticles.length} noticias`;
+          card.appendChild(wrap);
         }
+      }
+
+      frag.appendChild(card);
+    });
+
+    newsContainer.appendChild(frag);
+  }
+
+  /* ─── filtering / sorting ─── */
+  function getFiltered() {
+    const search = searchInput.value.trim().toLowerCase();
+    const source = sourceFilter.value;
+    const sort   = sortSelect.value;
+
+    let filtered = allArticles.filter(a => {
+      const src = getSource(a);
+      const text = [a.title, a.description, a.content, src].join(' ').toLowerCase();
+      return text.includes(search) && (!source || src === source);
+    });
+
+    if (sort === 'oldest') {
+      filtered = [...filtered].sort((a,b) => new Date(a.publishedAt||0) - new Date(b.publishedAt||0));
+    } else if (sort === 'source') {
+      filtered = [...filtered].sort((a,b) => getSource(a).localeCompare(getSource(b)));
+    } else {
+      filtered = [...filtered].sort((a,b) => new Date(b.publishedAt||0) - new Date(a.publishedAt||0));
+    }
+    return filtered;
+  }
+
+  function filterAndRender() {
+    const filtered = getFiltered();
+    renderNews(filtered, currentDate);
+    feedCount.textContent = filtered.length;
+    if (filtered.length !== allArticles.length) {
+      feedFilterInfo.textContent = `// filtrado de ${allArticles.length}`;
+    } else {
+      feedFilterInfo.textContent = '';
+    }
+  }
+
+  /* ─── source list (sidebar) ─── */
+  function buildSourceList(articles) {
+    const counts = new Map();
+    articles.forEach(a => {
+      const s = getSource(a);
+      if (!s) return;
+      counts.set(s, (counts.get(s)||0) + 1);
+    });
+    const sorted = [...counts.entries()].sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+
+    // legacy <select>
+    const prev = sourceFilter.value;
+    sourceFilter.innerHTML = '<option value="">all_sources</option>' +
+      sorted.map(([s]) => `<option value="${escapeHtml(s)}"${s===prev?' selected':''}>${escapeHtml(s)}</option>`).join('');
+
+    // sidebar list
+    sourceListEl.innerHTML = `<li class="source-item ${!prev?'active':''}" data-source=""><span class="name">all_sources</span><span class="num">${articles.length}</span></li>` +
+      sorted.map(([s,n]) => `<li class="source-item ${s===prev?'active':''}" data-source="${escapeHtml(s)}"><span class="name">${escapeHtml(s)}</span><span class="num">${n}</span></li>`).join('');
+
+    sourcesCount.textContent = sorted.length;
+  }
+
+  sourceListEl.addEventListener('click', (e) => {
+    const li = e.target.closest('.source-item');
+    if (!li) return;
+    const s = li.dataset.source || '';
+    sourceFilter.value = s;
+    [...sourceListEl.querySelectorAll('.source-item')].forEach(x => x.classList.toggle('active', x === li));
+    filterAndRender();
+  });
+
+  /* ─── metrics (only honest counts derived from data) ─── */
+  function updateMetrics(articles, dateObj) {
+    const sources = new Set(articles.map(getSource).filter(Boolean));
+    const authors = new Set(articles.map(a => a.author).filter(Boolean));
+    const withImg = articles.filter(a => !!a.urlToImage).length;
+
+    // hourly distribution + latest timestamp
+    const hours = new Array(24).fill(0);
+    let latest = null;
+    articles.forEach(a => {
+      if (!a.publishedAt) return;
+      const d = new Date(a.publishedAt); if (isNaN(d)) return;
+      hours[d.getUTCHours()]++;
+      if (!latest || d > latest) latest = d;
+    });
+
+    mTotal.textContent   = articles.length;
+    mSources.textContent = sources.size;
+    mAuthors.textContent = authors.size;
+    mImgs.textContent    = withImg;
+    tFeed.textContent    = ` ${articles.length}`;
+    tSrc.textContent     = ` ${sources.size}`;
+    tEdition.textContent = ` ${dispShort(dateObj)}`;
+    tLatest.textContent  = latest
+      ? ` ${String(latest.getUTCHours()).padStart(2,'0')}:${String(latest.getUTCMinutes()).padStart(2,'0')}Z`
+      : ' —';
+    metricId.textContent = `ID:${fmtDate(dateObj)}`;
+
+    // issue / date in masthead
+    const ed = `VOL. ${dateObj.getFullYear()-2022}`.padEnd(7,' ');
+    const dy = String(Math.ceil((dateObj - new Date(dateObj.getFullYear(),0,0))/86_400_000)).padStart(3,'0');
+    mIssue.textContent = `${ed} · ISSUE ${dy}`;
+    mDate.textContent  = dispDate(dateObj).toUpperCase();
+
+    // hourly bars
+    const max = Math.max(1, ...hours);
+    const peakHour = hours.indexOf(Math.max(...hours));
+    hourlyBars.innerHTML = '';
+    hours.forEach((n, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'hbar' + (i === peakHour && n > 0 ? ' peak' : '') + (n === 0 ? ' empty' : '');
+      bar.style.height = `${Math.max(2, Math.round((n / max) * 100))}%`;
+      bar.title = `${String(i).padStart(2,'0')}:00 UTC · ${n} artículos`;
+      hourlyBars.appendChild(bar);
+    });
+    hourlyTotal.textContent = `${articles.length} total`;
+    peakTag.textContent = articles.length
+      ? `PEAK ${String(peakHour).padStart(2,'0')}:00`
+      : '—';
+  }
+
+  /* ─── fetch ─── */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function fetchNews(date) {
+    newsContainer.style.opacity = '0';
+    await sleep(180);
+    showSkeleton(6);
+    newsContainer.style.opacity = '1';
+
+    let found = false;
+    let searchDate = new Date(date);
+    let articles = null;
+    let tries = 0;
+    const maxTries = 30;
+
+    while (!found && tries < maxTries) {
+      dateDisplay.textContent = dispShort(searchDate);
+      nextBtn.disabled = isTodayOrLater(searchDate);
+      try {
+        const res = await fetch(dataUrl(fmtDate(searchDate)));
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            articles = data; found = true; break;
+          }
+        }
+      } catch (_) {}
+      searchDate.setDate(searchDate.getDate() - 1);
+      tries++;
     }
 
-    function updateSourceFilter(articles) {
-        const sources = new Set(articles.map(getSource).filter(Boolean));
-        const prev = sourceFilter.value;
-        sourceFilter.innerHTML =
-            '<option value="">Todas las fuentes</option>' +
-            Array.from(sources).sort()
-                .map(s => `<option value="${s}"${s === prev ? ' selected' : ''}>${s}</option>`)
-                .join('');
+    newsContainer.style.opacity = '0';
+    await sleep(160);
+
+    if (found && articles) {
+      allArticles = articles;
+      searchInput.value = '';
+      sourceFilter.value = '';
+      buildSourceList(articles);
+      updateMetrics(articles, searchDate);
+      filterAndRender();
+      currentDate = searchDate;
+      dateDisplay.textContent = dispShort(searchDate);
+      updateUrl(searchDate);
+
+      if (tries > 0) {
+        const notice = document.createElement('div');
+        notice.className = 'notice';
+        notice.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> // mostrando edición disponible más reciente`;
+        const wrap = document.createElement('div');
+        wrap.style.marginBottom = '12px';
+        wrap.appendChild(notice);
+        newsContainer.parentNode.insertBefore(wrap, newsContainer);
+        // remove on next fetch
+        wrap.dataset.notice = '1';
+      }
+      // cleanup old notice
+      document.querySelectorAll('[data-notice]').forEach((el, i, list) => {
+        if (i < list.length - 1) el.remove();
+      });
+    } else {
+      newsContainer.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <strong>NO_DATA</strong>
+          <small>// no hay noticias en los últimos ${maxTries} días</small>
+        </div>`;
     }
 
-    // ── Fetch de noticias ────────────────────
+    nextBtn.disabled = isTodayOrLater(currentDate);
+    newsContainer.style.opacity = '1';
+  }
 
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+  /* ─── events ─── */
+  searchInput.addEventListener('input', filterAndRender);
+  sourceFilter.addEventListener('change', () => {
+    [...sourceListEl.querySelectorAll('.source-item')].forEach(x => x.classList.toggle('active', (x.dataset.source||'') === sourceFilter.value));
+    filterAndRender();
+  });
+  sortSelect.addEventListener('change', filterAndRender);
 
-    async function fetchNews(date) {
-        statsBar.textContent = '';
-
-        // Fade out
-        newsContainer.style.opacity = '0';
-        await sleep(220);
-
-        showSkeleton(6);
-        newsContainer.style.opacity = '1';
-
-        let found      = false;
-        let searchDate = new Date(date);
-        let articles   = null;
-        let tries      = 0;
-        const maxTries = 30;
-
-        while (!found && tries < maxTries) {
-            dateDisplay.textContent = displayDate(searchDate);
-            nextBtn.disabled = isTodayOrLater(searchDate);
-
-            try {
-                const res = await fetch(`data/${formatDate(searchDate)}.json`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        articles = data;
-                        found = true;
-                        break;
-                    }
-                }
-            } catch (_) { /* continuar */ }
-
-            searchDate.setDate(searchDate.getDate() - 1);
-            tries++;
-        }
-
-        // Fade out skeleton
-        newsContainer.style.opacity = '0';
-        await sleep(180);
-
-        if (found && articles) {
-            allArticles = articles;
-            searchInput.value = '';
-            sourceFilter.value = '';
-            updateSourceFilter(articles);
-            filterAndRender();
-
-            if (tries > 0) {
-                const notice = document.createElement('div');
-                notice.className = 'notice-msg';
-                notice.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Mostrando la edición más reciente disponible.`;
-                newsContainer.insertAdjacentElement('afterbegin', notice);
-            }
-
-            dateDisplay.textContent = displayDate(searchDate);
-            updateUrlWithDate(searchDate);
-            currentDate = searchDate;
-        } else {
-            newsContainer.innerHTML = `
-                <div class="state-msg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <strong>Sin noticias disponibles</strong>
-                    <small>No se encontraron noticias en los últimos ${maxTries} días.</small>
-                </div>`;
-            statsBar.textContent = '';
-        }
-
-        nextBtn.disabled = isTodayOrLater(currentDate);
-
-        // Fade in
-        newsContainer.style.opacity = '1';
-    }
-
-    // ── Eventos ──────────────────────────────
-
-    searchInput.addEventListener('input', filterAndRender);
-    sourceFilter.addEventListener('change', filterAndRender);
-
-    prevBtn.addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() - 1);
-        updateUrlWithDate(currentDate);
-        fetchNews(currentDate);
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (isTodayOrLater(currentDate)) return;
-        currentDate.setDate(currentDate.getDate() + 1);
-        updateUrlWithDate(currentDate);
-        fetchNews(currentDate);
-    });
-
-    // Navegación por teclado (← →) cuando no se está en un input
-    document.addEventListener('keydown', e => {
-        const tag = document.activeElement?.tagName;
-        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-        if (e.key === 'ArrowLeft'  && !prevBtn.disabled) prevBtn.click();
-        if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
-    });
-
-    // Botón volver arriba
-    window.addEventListener('scroll', () => {
-        backToTop.classList.toggle('visible', window.scrollY > 500);
-    }, { passive: true });
-
-    backToTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // ── Carga inicial ────────────────────────
-    updateUrlWithDate(currentDate);
+  prevBtn.addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() - 1);
+    updateUrl(currentDate);
     fetchNews(currentDate);
+  });
+  nextBtn.addEventListener('click', () => {
+    if (isTodayOrLater(currentDate)) return;
+    currentDate.setDate(currentDate.getDate() + 1);
+    updateUrl(currentDate);
+    fetchNews(currentDate);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+    if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+    if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
+  });
+
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('show', window.scrollY > 500);
+  }, { passive: true });
+  backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  /* ─── init ─── */
+  applyView();
+  // Don't rewrite URL on init — let the user land on whatever they typed.
+  // updateUrl() runs only on explicit date navigation.
+  fetchNews(currentDate);
 });

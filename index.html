@@ -1,102 +1,207 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureByte News · Ciberseguridad y Tecnología</title>
-    <meta name="description" content="Noticias, alertas y novedades sobre ciberseguridad, tecnología, vulnerabilidades, ataques y protección digital. Actualizaciones diarias.">
-    <meta name="keywords" content="ciberseguridad, seguridad informática, tecnología, noticias, alertas, vulnerabilidades, hacking, privacidad, malware, ransomware">
-    <meta name="author" content="SecureByte News">
-    <link rel="canonical" href="https://thesecurebytenews.hahndev.com">
-    <meta name="robots" content="index, follow">
-    <meta name="google-adsense-account" content="ca-pub-5060273779558812">
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="SecureByte News · Ciberseguridad y Tecnología">
-    <meta property="og:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología. Mantente informado sobre los últimos ataques, vulnerabilidades y consejos de protección digital.">
-    <meta property="og:url" content="https://thesecurebytenews.hahndev.com">
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SecureByte News · Ciberseguridad y Tecnología">
-    <meta name="twitter:description" content="Noticias, alertas y novedades sobre ciberseguridad y tecnología.">
-    <!-- Favicon -->
-    <link rel="icon" href="/Images/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureByte News · Inteligencia de Ciberseguridad</title>
+  <meta name="description" content="Centro de inteligencia diario sobre ciberseguridad: alertas, vulnerabilidades, ataques y novedades del sector. Actualizado diariamente.">
+  <meta name="keywords" content="ciberseguridad, seguridad informática, vulnerabilidades, hacking, malware, ransomware, alertas, OSINT">
+  <meta name="author" content="SecureByte News">
+  <link rel="canonical" href="https://thesecurebytenews.hahndev.com">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SecureByte News · Inteligencia de Ciberseguridad">
+  <meta property="og:description" content="Centro de inteligencia diario sobre ciberseguridad y tecnología.">
+  <meta property="og:url" content="https://thesecurebytenews.hahndev.com">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="Images/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="Images/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ═══ HEADER (siempre oscuro + sticky) ═══ -->
-    <header id="site-header">
-        <div class="header-inner">
+  <!-- ═══ TICKER ═══ -->
+  <div class="ticker" role="status" aria-label="Estado del sistema">
+    <div class="ticker-inner">
+      <span class="ticker-pulse">
+        <span class="pulse-dot"></span>
+        LIVE
+      </span>
+      <span class="ticker-sep">|</span>
+      <span class="ticker-item">FEED<b id="t-feed">—</b></span>
+      <span class="ticker-sep">|</span>
+      <span class="ticker-item">SOURCES<b id="t-src">—</b></span>
+      <span class="ticker-sep">|</span>
+      <span class="ticker-item opt">EDITION<b id="t-edition">—</b></span>
+      <span class="ticker-sep opt">|</span>
+      <span class="ticker-item opt">LATEST<b id="t-latest">—</b></span>
+      <span class="ticker-spacer"></span>
+      <span class="ticker-item opt">UTC</span>
+      <span class="ticker-clock mono" id="t-clock">--:--:--</span>
+    </div>
+  </div>
 
-            <!-- Fila 1: Marca + Toggle tema -->
-            <div class="brand-row">
-                <div class="brand">
-                    <div class="brand-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                            <polyline points="9 12 11 14 15 10"/>
-                        </svg>
-                    </div>
-                    <div class="brand-text">
-                        <span class="brand-name">SecureByte News</span>
-                        <span class="brand-tagline">Ciberseguridad · Tecnología · Alertas</span>
-                    </div>
-                </div>
-                <button id="toggle-theme-btn" aria-label="Alternar modo claro/oscuro" title="Modo claro/oscuro">
-                    <span id="theme-icon"></span>
-                </button>
-            </div>
-
-            <!-- Fila 2: Búsqueda + Filtro + Navegación fechas -->
-            <div class="toolbar-row">
-                <div class="search-filter">
-                    <div class="search-wrapper">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                        </svg>
-                        <input id="search-input" type="search" placeholder="Buscar noticias..." aria-label="Buscar noticias" autocomplete="off">
-                    </div>
-                    <select id="source-filter" aria-label="Filtrar por fuente">
-                        <option value="">Todas las fuentes</option>
-                    </select>
-                </div>
-
-                <nav class="date-nav" aria-label="Navegación por fechas">
-                    <button id="prev-day-btn" aria-label="Día anterior">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
-                    </button>
-                    <h2 id="current-date-display"></h2>
-                    <button id="next-day-btn" aria-label="Día siguiente">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-                    </button>
-                </nav>
-            </div>
-
+  <!-- ═══ MASTHEAD ═══ -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <!-- brand (left) -->
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
+            <path d="M12 2 4 5v7c0 5 8 10 8 10s8-5 8-10V5l-8-3z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
         </div>
-    </header>
+        <div class="brand-text">
+          <div class="brand-name">SecureByte<span class="dot">_</span>News</div>
+          <div class="brand-sub">Cyber Intel · Daily Brief</div>
+        </div>
+      </div>
 
-    <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
-    <main>
-        <div class="stats-bar" id="stats-bar" aria-live="polite" aria-atomic="true"></div>
-        <section id="news-container" aria-live="polite" aria-label="Listado de noticias"></section>
+      <!-- edition (center) -->
+      <div class="edition">
+        <div class="edition-label">— Edición Diaria —</div>
+        <h1 class="edition-title">El Boletín de Ciberinteligencia</h1>
+        <div class="edition-meta">
+          <span id="m-issue">VOL. 04 · ISSUE 0423</span>
+          <span class="sep">·</span>
+          <span id="m-date">—</span>
+        </div>
+      </div>
+
+      <!-- actions (right) -->
+      <div class="head-actions">
+        <button class="icon-btn" id="view-list-btn" aria-label="Vista lista" title="Vista lista">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <button class="icon-btn" id="view-grid-btn" aria-label="Vista cuadrícula" title="Vista cuadrícula">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button class="icon-btn" id="toggle-theme-btn" aria-label="Alternar tema" title="Alternar tema">
+          <span id="theme-icon"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ CONTROL BAR ═══ -->
+  <div class="controls">
+    <div class="controls-inner">
+      <div class="search-box">
+        <span class="search-prompt">$ grep</span>
+        <input id="search-input" type="search" placeholder="vulnerabilidad | ransomware | actor:apt29 ..." aria-label="Buscar noticias" autocomplete="off">
+      </div>
+
+      <div class="filter-box">
+        <label for="source-filter">SRC</label>
+        <select id="source-filter" aria-label="Filtrar por fuente">
+          <option value="">all_sources</option>
+        </select>
+      </div>
+
+      <div class="sort-box">
+        <label for="sort-select">SORT</label>
+        <select id="sort-select" aria-label="Ordenar">
+          <option value="latest">latest_first</option>
+          <option value="oldest">oldest_first</option>
+          <option value="source">by_source</option>
+        </select>
+      </div>
+
+      <div class="date-nav" aria-label="Navegación por fechas">
+        <button id="prev-day-btn" aria-label="Día anterior" title="Día anterior (←)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span id="current-date-display">—</span>
+        <button id="next-day-btn" aria-label="Día siguiente" title="Día siguiente (→)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="shell">
+
+    <!-- ─── sidebar ─── -->
+    <aside class="sidebar">
+
+      <section class="panel" aria-label="Resumen de la edición">
+        <div class="panel-head">
+          <span>// edition_summary</span>
+          <span class="count" id="metric-id">—</span>
+        </div>
+        <div class="status-grid" id="metrics-grid">
+          <div class="status-cell"><span class="lbl">Artículos</span><span class="val accent" id="m-total">0</span></div>
+          <div class="status-cell"><span class="lbl">Fuentes</span><span class="val" id="m-sources">0</span></div>
+          <div class="status-cell"><span class="lbl">Autores</span><span class="val" id="m-authors">0</span></div>
+          <div class="status-cell"><span class="lbl">Con imagen</span><span class="val" id="m-imgs">0</span></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Actividad horaria">
+        <div class="panel-head">
+          <span>// hourly_activity</span>
+          <span class="count" id="peak-tag">—</span>
+        </div>
+        <div class="hourly">
+          <div class="hourly-bars" id="hourly-bars" aria-hidden="true"></div>
+          <div class="hourly-axis">
+            <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+          </div>
+          <div class="hourly-foot">
+            <span class="threat-label">Distribución por hora UTC</span>
+            <span class="threat-label" id="hourly-total">—</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Fuentes">
+        <div class="panel-head">
+          <span>// sources</span>
+          <span class="count" id="sources-count">—</span>
+        </div>
+        <ul class="source-list" id="source-list">
+          <li class="source-item active" data-source=""><span class="name">all_sources</span><span class="num">—</span></li>
+        </ul>
+      </section>
+
+    </aside>
+
+    <!-- ─── feed ─── -->
+    <main class="feed">
+      <div class="feed-meta">
+        <div class="left">
+          <span><b id="feed-count">0</b> artículos</span>
+          <span class="accent" id="feed-filter-info"></span>
+        </div>
+        <div class="view-toggle">
+          <button id="vt-list" class="active" data-view="list">List</button>
+          <button id="vt-grid" data-view="grid">Grid</button>
+        </div>
+      </div>
+      <section id="news-container" aria-live="polite" aria-label="Listado de noticias"></section>
     </main>
 
-    <!-- Botón volver arriba -->
-    <button id="back-to-top" aria-label="Volver al inicio de la página" title="Volver arriba">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m18 15-6-6-6 6"/></svg>
-    </button>
+  </div>
 
-    <!-- ═══ FOOTER ═══ -->
-    <footer>
-        <div class="footer-inner">
-            <span class="footer-brand">SecureByte News</span>
-            <span class="footer-copy">&copy; 2025 Seguridad y Tecnología. Todos los derechos reservados.</span>
-            <span class="footer-hint">Usa ← → para navegar entre días</span>
-        </div>
-    </footer>
+  <!-- back to top -->
+  <button id="back-to-top" aria-label="Volver arriba" title="Volver arriba">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="m18 15-6-6-6 6"/></svg>
+  </button>
 
-    <script src="script.js"></script>
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">SecureByte<span class="dot">_</span>News &copy; 2026</div>
+      <div class="footer-center">// Open Source Intelligence · Independent · Daily</div>
+      <div class="footer-end">Navegar: <kbd>←</kbd> <kbd>→</kbd></div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
