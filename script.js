@@ -255,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = new Image();
         img.alt = '';
         img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
         img.onload  = () => wrap.appendChild(img);
         img.onerror = () => wrap.remove();
         img.src = a.urlToImage;
