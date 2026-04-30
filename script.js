@@ -438,12 +438,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await fetchJson(url);
         console.log('got data:', data?.length, 'articles');
         if (Array.isArray(data) && data.length > 0) {
-            articles = data; found = true; break;
-          }
+          articles = data;
+          found = true;
+          break;
         }
       } catch (e) {
-      console.warn('fetch error:', e.message || e);
-    }
+        console.warn('fetch error:', e.message || e);
+      }
       searchDate.setDate(searchDate.getDate() - 1);
       tries++;
     }
