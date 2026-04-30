@@ -5,7 +5,9 @@
 /* ---- THEME (init early to prevent FOUC) ---- */
 (function () {
   const root  = document.documentElement;
-  const stored = localStorage.getItem('sbn-theme');
+  try {
+    var stored = localStorage.getItem('sbn-theme');
+  } catch (e) { stored = null; }
   const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
   const initial = stored || (prefersLight ? 'light' : 'dark');
   if (initial === 'light') root.classList.add('light');
@@ -21,7 +23,9 @@
     paint();
     btn.addEventListener('click', () => {
       root.classList.toggle('light');
-      localStorage.setItem('sbn-theme', root.classList.contains('light') ? 'light' : 'dark');
+      try {
+        localStorage.setItem('sbn-theme', root.classList.contains('light') ? 'light' : 'dark');
+      } catch (e) {}
       paint();
     });
   });
@@ -79,7 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let allArticles = [];
   let currentDate = getDateFromUrl();
-  let currentView = localStorage.getItem('sbn-view') || 'list';
+  let currentView;
+  try { currentView = localStorage.getItem('sbn-view') || 'list'; }
+  catch (e) { currentView = 'list'; }
   const today = new Date();
 
   // Compute a stable base URL for fetching data, regardless of any /YYYYMMDD
@@ -183,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
     vtList.classList.toggle('active', currentView === 'list');
     vtGrid.classList.toggle('active', currentView === 'grid');
   }
-  vtList.addEventListener('click', () => { currentView='list'; localStorage.setItem('sbn-view','list'); applyView(); });
-  vtGrid.addEventListener('click', () => { currentView='grid'; localStorage.setItem('sbn-view','grid'); applyView(); });
+  vtList.addEventListener('click', () => { currentView='list'; try { localStorage.setItem('sbn-view','list'); } catch (e) {} applyView(); });
+  vtGrid.addEventListener('click', () => { currentView='grid'; try { localStorage.setItem('sbn-view','grid'); } catch (e) {} applyView(); });
 
   /* ─── render ─── */
   function escapeHtml(s) {
@@ -388,8 +394,28 @@ document.addEventListener('DOMContentLoaded', () => {
       : '—';
   }
 
-  /* ─── fetch ─── */
+  /* ─── fetch (with XHR fallback for older Safari) ─── */
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function fetchJson(url) {
+    if (typeof fetch === 'function') {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('fetch failed');
+      return res.json();
+    }
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch (e) { reject(e); }
+        } else { reject(new Error('xhr failed')); }
+      };
+      xhr.onerror = () => reject(new Error('xhr network error'));
+      xhr.send();
+    });
+  }
 
   async function fetchNews(date) {
     newsContainer.style.opacity = '0';
@@ -406,15 +432,18 @@ document.addEventListener('DOMContentLoaded', () => {
     while (!found && tries < maxTries) {
       dateDisplay.textContent = dispShort(searchDate);
       nextBtn.disabled = isTodayOrLater(searchDate);
+      const url = dataUrl(fmtDate(searchDate));
       try {
-        const res = await fetch(dataUrl(fmtDate(searchDate)));
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
+        console.log('fetching:', url);
+        const data = await fetchJson(url);
+        console.log('got data:', data?.length, 'articles');
+        if (Array.isArray(data) && data.length > 0) {
             articles = data; found = true; break;
           }
         }
-      } catch (_) {}
+      } catch (e) {
+      console.warn('fetch error:', e.message || e);
+    }
       searchDate.setDate(searchDate.getDate() - 1);
       tries++;
     }
@@ -498,7 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ─── init ─── */
   applyView();
-  // Don't rewrite URL on init — let the user land on whatever they typed.
-  // updateUrl() runs only on explicit date navigation.
+  console.log('SBN init — view:', currentView, 'date:', currentDate);
   fetchNews(currentDate);
 });
