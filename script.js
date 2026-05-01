@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const peakTag    = document.getElementById('peak-tag');
   const vtList = document.getElementById('vt-list');
   const vtGrid = document.getElementById('vt-grid');
+  const headViewList = document.getElementById('view-list-btn');
+  const headViewGrid = document.getElementById('view-grid-btn');
 
   let allArticles = [];
   let currentDate = getDateFromUrl();
@@ -188,9 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
     newsContainer.classList.toggle('grid', currentView === 'grid');
     vtList.classList.toggle('active', currentView === 'list');
     vtGrid.classList.toggle('active', currentView === 'grid');
+    if (headViewList) headViewList.classList.toggle('active', currentView === 'list');
+    if (headViewGrid) headViewGrid.classList.toggle('active', currentView === 'grid');
   }
-  vtList.addEventListener('click', () => { currentView='list'; try { localStorage.setItem('sbn-view','list'); } catch (e) {} applyView(); });
-  vtGrid.addEventListener('click', () => { currentView='grid'; try { localStorage.setItem('sbn-view','grid'); } catch (e) {} applyView(); });
+  function setView(v) {
+    currentView = v;
+    try { localStorage.setItem('sbn-view', v); } catch (e) {}
+    applyView();
+  }
+  vtList.addEventListener('click', () => setView('list'));
+  vtGrid.addEventListener('click', () => setView('grid'));
+  if (headViewList) headViewList.addEventListener('click', () => setView('list'));
+  if (headViewGrid) headViewGrid.addEventListener('click', () => setView('grid'));
 
   /* ─── render ─── */
   function escapeHtml(s) {

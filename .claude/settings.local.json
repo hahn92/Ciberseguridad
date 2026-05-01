@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(ls -1 /Users/hahn/Documents/Desarrollo/Ciberseguridad/data/*.json)",
-      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(a.get\\('urlToImage',''\\)\\) for a in data[:10]]\")"
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(a.get\\('urlToImage',''\\)\\) for a in data[:10]]\")",
+      "Bash(python3 *)",
+      "Bash(kill bjoq3vvmj *)",
+      "Bash(pkill -f \"python3 -m http.server 8765\")"
     ]
   }
 }
