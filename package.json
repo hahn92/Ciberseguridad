@@ -1,0 +1,13 @@
+{
+  "name": "ciberseguridad",
+  "version": "1.0.0",
+  "description": "Sitio Ciberseguridad",
+  "scripts": {
+    "minify:js": "terser script.js -o script.min.js --compress --mangle",
+    "minify:css": "cleancss -o style.min.css style.css"
+  },
+  "devDependencies": {
+    "clean-css-cli": "^5.6.3",
+    "terser": "^5.30.3"
+  }
+}
